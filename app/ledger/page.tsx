@@ -381,7 +381,7 @@ export default function LedgerPage() {
                 <Wallet size={18} />
               </div>
               <p className="mb-0.5 text-2xl font-semibold text-gray-900">{formatCurrency(salesTotal)}</p>
-              <p className="text-xs text-gray-400">Today's sales</p>
+              <p className="text-xs text-gray-400">Today&apos;s sales</p>
             </article>
 
             <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
