@@ -6,8 +6,17 @@ import { supabase } from "@/lib/supabase";
 import type { Sale, SaleItem } from "@/types";
 
 type SaleItemJoined = SaleItem & {
-  products: { name: string; category: string | null } | null;
+  products:
+    | { name: string; category: string | null }
+    | { name: string; category: string | null }[]
+    | null;
 };
+
+function getProductName(productRel: SaleItemJoined["products"]) {
+  if (!productRel) return "Unknown";
+  if (Array.isArray(productRel)) return productRel[0]?.name ?? "Unknown";
+  return productRel.name;
+}
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 function formatAmount(n: number) {
@@ -97,7 +106,7 @@ export default function RevenuePage() {
   const topByQty = useMemo(() => {
     const map = new Map<string, { name: string; qty: number }>();
     for (const item of saleItems) {
-      const name = item.products?.name ?? "Unknown";
+      const name = getProductName(item.products);
       const existing = map.get(name) ?? { name, qty: 0 };
       existing.qty += item.quantity;
       map.set(name, existing);
@@ -108,7 +117,7 @@ export default function RevenuePage() {
   const topByRevenue = useMemo(() => {
     const map = new Map<string, { name: string; revenue: number }>();
     for (const item of saleItems) {
-      const name = item.products?.name ?? "Unknown";
+      const name = getProductName(item.products);
       const existing = map.get(name) ?? { name, revenue: 0 };
       existing.revenue += item.subtotal ?? 0;
       map.set(name, existing);
