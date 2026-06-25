@@ -186,12 +186,13 @@ export default function RevenuePage() {
           {/* Section 2 — Last 7 days bar chart */}
           <div className="mb-4 rounded-2xl border border-purple-100 bg-white p-5">
             <h2 className="mb-4 text-sm font-semibold text-gray-800">Last 7 days</h2>
+            {/* Bar chart — pixel heights so percentage-in-flex-child works correctly */}
             <div className="flex items-end gap-2" style={{ height: "8rem" }}>
               {dailyRevenue.map((day) => {
-                const heightPct =
-                  day.revenue > 0
-                    ? Math.max(4, (day.revenue / maxDayRevenue) * 100)
-                    : 4;
+                const MAX_BAR_PX = 80; // leaves ~48px for the two text labels
+                const barPx = day.revenue > 0
+                  ? Math.max(4, Math.round((day.revenue / maxDayRevenue) * MAX_BAR_PX))
+                  : 4;
                 return (
                   <div
                     key={day.dateKey}
@@ -203,7 +204,7 @@ export default function RevenuePage() {
                     </span>
                     <div
                       className="w-full rounded-t-lg bg-gradient-to-t from-violet-500 to-purple-400"
-                      style={{ height: `${heightPct}%`, minHeight: "4px" }}
+                      style={{ height: `${barPx}px` }}
                     />
                     <span className="text-[10px] text-gray-400">{day.label}</span>
                   </div>
