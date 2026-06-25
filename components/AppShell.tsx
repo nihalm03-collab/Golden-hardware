@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart2,
-  Bell,
   BookOpen,
   Hammer,
   Layers,
@@ -118,12 +117,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                className="rounded-lg border border-purple-100 p-2 text-gray-500 transition-all hover:bg-purple-50 hover:text-purple-600"
-                aria-label="Notifications"
-              >
-                <Bell size={16} />
-              </button>
               <Link
                 href="/sales"
                 className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-xs font-medium text-white md:py-2"
