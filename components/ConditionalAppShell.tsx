@@ -14,29 +14,31 @@ export function ConditionalAppShell({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(pathname === "/login");
 
   useEffect(() => {
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session && pathname !== "/login") {
-        router.replace("/login");
-        // Keep ready = false so we show nothing while redirecting
-      } else if (session && pathname === "/login") {
+    let mounted = true;
+
+    // onAuthStateChange fires immediately with the current session state
+    // (INITIAL_SESSION event) AND on every subsequent change (SIGNED_IN,
+    // SIGNED_OUT, TOKEN_REFRESHED). Using this as the single source of truth
+    // avoids the race condition where getSession() resolves before the
+    // Supabase client has persisted the session from a fresh login.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+
+      if (session && pathname === "/login") {
         router.replace("/");
-        // Keep ready = false while redirecting
+      } else if (!session && pathname !== "/login") {
+        router.replace("/login");
       } else {
         setReady(true);
       }
     });
 
-    // Watch for sign-out (e.g. session expiry or logout from another tab)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session && pathname !== "/login") {
-        router.replace("/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
