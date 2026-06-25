@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart2,
   Bell,
@@ -9,11 +9,12 @@ import {
   Hammer,
   Layers,
   LayoutDashboard,
+  LogOut,
   Package,
   Plus,
   Receipt,
-  Settings,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const menuItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -34,6 +35,13 @@ function formatTodayDate() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  }
+
   const mobileNavItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/products", label: "Products", icon: Package },
@@ -91,13 +99,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="mt-auto border-t border-purple-100 p-2">
-          <a
-            href="#"
-            className="mb-0.5 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-xs text-gray-500 transition-all hover:bg-purple-50 hover:text-purple-600"
+          <button
+            onClick={handleLogout}
+            className="mb-0.5 flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-xs text-gray-500 transition-all hover:bg-red-50 hover:text-red-500"
           >
-            <Settings size={15} className="text-gray-400" />
-            <span>Settings</span>
-          </a>
+            <LogOut size={15} className="text-gray-400" />
+            <span>Sign out</span>
+          </button>
         </div>
       </aside>
 
@@ -123,6 +131,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Plus size={14} />
                 <span className="hidden sm:inline">New Sale</span>
               </Link>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg border border-purple-100 p-2 text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:hidden"
+                aria-label="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           </div>
         </header>
