@@ -335,7 +335,7 @@ export default function LedgerPage() {
 
   return (
     <section className="min-h-full bg-[#f8f7ff] p-6">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-2">
         <button
           onClick={goPrevDay}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-purple-100 bg-white transition hover:bg-purple-50"
@@ -344,7 +344,37 @@ export default function LedgerPage() {
           <ChevronLeft size={16} className="text-gray-600" />
         </button>
 
-        <p className="text-sm font-medium text-indigo-950">{formatReadableDate(selectedDate)}</p>
+        <div className="relative">
+          <button
+            onClick={() => {
+              const input = document.getElementById("ledger-date-picker") as HTMLInputElement;
+              input?.showPicker?.();
+              input?.click();
+            }}
+            className="cursor-pointer rounded-lg border border-purple-100 bg-white px-3 py-1.5 text-sm font-medium text-indigo-950 transition hover:bg-purple-50"
+          >
+            {formatReadableDate(selectedDate)}
+          </button>
+          <input
+            id="ledger-date-picker"
+            type="date"
+            max={today}
+            value={selectedDate}
+            onChange={(e) => {
+              if (e.target.value) setSelectedDate(e.target.value);
+            }}
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+          />
+        </div>
+
+        {!isToday && (
+          <button
+            onClick={() => setSelectedDate(today)}
+            className="rounded-lg border border-purple-100 bg-white px-2.5 py-1.5 text-xs font-medium text-purple-600 transition hover:bg-purple-50"
+          >
+            Today
+          </button>
+        )}
 
         <button
           onClick={goNextDay}
