@@ -75,6 +75,10 @@ function shiftDate(dateStr: string, byDays: number) {
   return `${y}-${m}-${day}`;
 }
 
+function clampToToday(dateStr: string, today: string) {
+  return dateStr > today ? today : dateStr;
+}
+
 function categoryMeta(category: ExpenseCategory) {
   if (category === "purchase") {
     return {
@@ -251,7 +255,7 @@ export default function LedgerPage() {
     if (isToday) return;
     setSelectedDate((prev) => {
       const next = shiftDate(prev, 1);
-      return next > today ? today : next;
+      return clampToToday(next, today);
     });
   }
 
@@ -358,7 +362,9 @@ export default function LedgerPage() {
             max={today}
             value={selectedDate}
             onChange={(e) => {
-              if (e.target.value) setSelectedDate(e.target.value);
+              if (e.target.value) {
+                setSelectedDate(clampToToday(e.target.value, today));
+              }
             }}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           />
