@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ConditionalAppShell } from "@/components/ConditionalAppShell";
+import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "Golden Hardwares",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <ConditionalAppShell>{children}</ConditionalAppShell>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

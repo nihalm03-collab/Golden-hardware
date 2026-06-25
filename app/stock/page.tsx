@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -56,17 +55,11 @@ function formatDate(iso: string | null) {
 }
 
 /* ── Stat card ─────────────────────────────────────────────────────── */
-type FilterType = "all" | "low" | "out";
-
 /* ── Main page ─────────────────────────────────────────────────────── */
-function StockPageContent() {
-  const searchParams = useSearchParams();
+export default function StockPage() {
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<FilterType>(
-    () => (searchParams.get("filter") === "low" ? "low" : "all"),
-  );
 
   /* restock modal */
   const [target, setTarget] = useState<RestockTarget | null>(null);
@@ -151,12 +144,6 @@ function StockPageContent() {
   const lowStock = rows.filter((r) => r.status === "low-stock").length;
   const outOfStock = rows.filter((r) => r.status === "out-of-stock").length;
 
-  const filteredRows = rows.filter((r) => {
-    if (activeFilter === "low") return r.status === "low-stock" || r.status === "out-of-stock";
-    if (activeFilter === "out") return r.status === "out-of-stock";
-    return true;
-  });
-
   /* open restock modal */
   function openRestock(product: StockRow) {
     setTarget({ id: product.id, name: product.name, unit: product.unit });
@@ -218,7 +205,7 @@ function StockPageContent() {
       )}
 
       {/* Stat cards */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-xl border border-purple-100 bg-white p-4">
           <Layers className="text-indigo-950" size={18} />
           <p className="mt-2 text-xl font-semibold text-indigo-950">{rows.length}</p>
@@ -241,84 +228,50 @@ function StockPageContent() {
         </article>
       </div>
 
-      {/* Filter pills */}
-      <div className="mb-4 flex gap-2">
-        {([
-          { key: "all", label: "All items" },
-          { key: "low", label: "Low stock" },
-          { key: "out", label: "Out of stock" },
-        ] as { key: FilterType; label: string }[]).map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setActiveFilter(key)}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
-              activeFilter === key
-                ? "bg-purple-100 text-purple-600"
-                : "bg-white border border-purple-100 text-gray-500 hover:bg-purple-50"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-purple-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-sm">
         {loading ? (
           <div className="py-16 text-center text-sm text-gray-400">
             <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
             Loading stock data...
           </div>
-        ) : filteredRows.length === 0 ? (
+        ) : rows.length === 0 ? (
           <div className="py-16 text-center">
             <PackageOpen className="mx-auto mb-3 h-10 w-10 text-purple-200" />
-            <p className="text-sm text-gray-400">No products match this filter</p>
+            <p className="text-sm text-gray-400">No products found</p>
           </div>
         ) : (
-          <table className="min-w-[860px]">
+          <table className="min-w-full">
             <thead className="bg-purple-50">
               <tr>
-                <th className="sticky left-0 z-10 bg-purple-50 px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  Product Name
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  SKU
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  Category
-                </th>
-                <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400 md:table-cell">
-                  Brand
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  Current Stock
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  Status
-                </th>
-                <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400 md:table-cell">
-                  Low Stock At
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  Last Updated
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">
-                  
-                </th>
+                {[
+                  "Product Name",
+                  "SKU",
+                  "Category",
+                  "Current Stock",
+                  "Status",
+                  "Low Stock At",
+                  "Last Updated",
+                  "",
+                ].map((col) => (
+                  <th
+                    key={col}
+                    className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400"
+                  >
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => (
+              {rows.map((row) => (
                 <tr key={row.id} className="border-b border-gray-50 transition-colors hover:bg-purple-50/40">
-                  <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm text-gray-700">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {row.name}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">{row.sku}</td>
                   <td className={`px-4 py-3 text-sm ${row.category ? "text-gray-700" : "text-gray-300"}`}>
                     {row.category ?? "—"}
-                  </td>
-                  <td className={`hidden px-4 py-3 text-sm md:table-cell ${row.brand ? "text-gray-700" : "text-gray-300"}`}>
-                    {row.brand ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">
                     <p>
@@ -355,7 +308,7 @@ function StockPageContent() {
                       {STATUS_LABELS[row.status]}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 text-sm text-gray-700 md:table-cell">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {row.low_stock_at}
                   </td>
                   <td className={`px-4 py-3 text-sm ${row.lastUpdated ? "text-gray-700" : "text-gray-300"}`}>
@@ -385,12 +338,11 @@ function StockPageContent() {
             if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="relative w-full max-w-md rounded-t-2xl bg-white p-6 shadow-2xl md:rounded-2xl">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-200 md:hidden" />
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h2 className="mb-1 text-base font-semibold text-indigo-950">Add Stock</h2>
             <p className="mb-5 text-xs text-gray-400">{target.name}</p>
 
-            <form onSubmit={handleRestock} className="space-y-4">
+            <form onSubmit={handleRestock} className="px-6 py-5 space-y-4">
               {modalError && (
                 <p className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
                   <AlertCircle size={16} />
@@ -412,7 +364,7 @@ function StockPageContent() {
                   value={qty}
                   onChange={(e) => setQty(Number(e.target.value))}
                   required
-                  className="h-11 w-full rounded-xl border border-purple-100 px-3 text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200 md:text-sm"
+                  className="w-full rounded-xl border border-purple-100 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200"
                 />
               </div>
 
@@ -429,7 +381,7 @@ function StockPageContent() {
                   placeholder="e.g. Restocked from supplier"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-purple-100 px-3 text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200 md:text-sm"
+                  className="w-full rounded-xl border border-purple-100 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200"
                 />
               </div>
 
@@ -437,14 +389,14 @@ function StockPageContent() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-500 transition hover:bg-gray-50"
+                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-500 transition hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                  className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                 >
                   {submitting ? "Saving…" : "Add Stock"}
                 </button>
@@ -462,13 +414,5 @@ function StockPageContent() {
         </div>
       )}
     </section>
-  );
-}
-
-export default function StockPage() {
-  return (
-    <Suspense>
-      <StockPageContent />
-    </Suspense>
   );
 }

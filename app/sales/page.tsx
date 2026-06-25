@@ -160,7 +160,7 @@ export default function SalesPage() {
       const { data: products } = await supabase
         .from("products")
         .select("*")
-        .ilike("name", `%${q}%`)
+        .or(`name.ilike.%${q}%,sku.ilike.%${q}%`)
         .limit(10);
 
       if (!products || products.length === 0) {
@@ -307,10 +307,10 @@ export default function SalesPage() {
       </div>
 
       {/* Two-column layout */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
         {/* ── LEFT: New Sale ───────────────────────────────────────── */}
-        <div className="order-1 rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-gray-800">New Sale</h2>
           <p className="mb-3 text-[10px] text-gray-400">Bill #S-XXXX</p>
 
@@ -322,7 +322,7 @@ export default function SalesPage() {
               placeholder="Search products..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-11 w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-base text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200 md:text-sm"
+              className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200"
             />
 
             {/* Dropdown results */}
@@ -348,7 +348,7 @@ export default function SalesPage() {
                     <div>
                       <p className="text-sm font-medium text-gray-700">{p.name}</p>
                       <p className="mt-0.5 text-xs text-gray-400">
-                        ₹{p.selling_price ?? 0} · Stock {p.currentStock}
+                        {p.sku} · ₹{p.selling_price ?? 0} · Stock {p.currentStock}
                       </p>
                     </div>
                     <span className="text-xs font-medium text-purple-500">
@@ -388,7 +388,7 @@ export default function SalesPage() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => adjustQty(c.product.id, -1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-100 text-sm text-gray-600 transition hover:bg-purple-50"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-purple-100 text-sm text-gray-600 transition hover:bg-purple-50"
                     >
                       −
                     </button>
@@ -397,7 +397,7 @@ export default function SalesPage() {
                     </span>
                     <button
                       onClick={() => adjustQty(c.product.id, 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-100 text-sm text-gray-600 transition hover:bg-purple-50"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-purple-100 text-sm text-gray-600 transition hover:bg-purple-50"
                     >
                       +
                     </button>
@@ -441,7 +441,7 @@ export default function SalesPage() {
                   onChange={(e) =>
                     setDiscount(Math.max(0, Number(e.target.value)))
                   }
-                  className="h-11 w-20 rounded-lg border border-purple-100 px-2 py-1 text-right text-base md:text-sm"
+                  className="w-20 rounded-lg border border-purple-100 px-2 py-1 text-right text-sm"
                 />
               </div>
               <div className="my-2 border-t border-purple-100" />
@@ -470,7 +470,7 @@ export default function SalesPage() {
           <button
             onClick={completeSale}
             disabled={completing || cart.length === 0}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-4 md:py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
           >
             <ShoppingCart size={16} />
             {completing ? "Processing…" : "Complete Sale"}
@@ -478,7 +478,7 @@ export default function SalesPage() {
         </div>
 
         {/* ── RIGHT: Today's bills ─────────────────────────────────── */}
-        <div className="order-2 rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-gray-800">
             Today&apos;s Bills
           </h2>

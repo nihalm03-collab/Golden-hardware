@@ -194,53 +194,45 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <Link href="/sales" className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200">
-              <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
-                <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-violet-500 to-indigo-500" />
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                  <TrendingUp size={18} />
-                </div>
-                <p className="mb-0.5 text-2xl font-semibold text-gray-900">₹{todayRevenue.toFixed(2)}</p>
-                <p className="text-xs text-gray-400">Today&apos;s Revenue</p>
-              </article>
-            </Link>
+          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
+              <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-violet-500 to-indigo-500" />
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <TrendingUp size={18} />
+              </div>
+              <p className="mb-0.5 text-2xl font-semibold text-gray-900">₹{todayRevenue.toFixed(2)}</p>
+              <p className="text-xs text-gray-400">Today's Revenue</p>
+            </article>
 
-            <Link href="/sales" className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200">
-              <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
-                <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-emerald-400 to-green-500" />
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <ShoppingCart size={18} />
-                </div>
-                <p className="mb-0.5 text-2xl font-semibold text-gray-900">{todayTransactions}</p>
-                <p className="text-xs text-gray-400">Today&apos;s Transactions</p>
-              </article>
-            </Link>
+            <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
+              <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-emerald-400 to-green-500" />
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <ShoppingCart size={18} />
+              </div>
+              <p className="mb-0.5 text-2xl font-semibold text-gray-900">{todayTransactions}</p>
+              <p className="text-xs text-gray-400">Today's Transactions</p>
+            </article>
 
-            <Link href="/products" className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200">
-              <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
-                <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-amber-400 to-orange-500" />
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                  <Package size={18} />
-                </div>
-                <p className="mb-0.5 text-2xl font-semibold text-gray-900">{products.length}</p>
-                <p className="text-xs text-gray-400">Total Products</p>
-              </article>
-            </Link>
+            <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
+              <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-amber-400 to-orange-500" />
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <Package size={18} />
+              </div>
+              <p className="mb-0.5 text-2xl font-semibold text-gray-900">{products.length}</p>
+              <p className="text-xs text-gray-400">Total Products</p>
+            </article>
 
-            <Link href="/stock?filter=low" className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200">
-              <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
-                <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-rose-400 to-red-500" />
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500">
-                  <AlertTriangle size={18} />
-                </div>
-                <p className="mb-0.5 text-2xl font-semibold text-gray-900">{lowStockCount + outOfStockCount}</p>
-                <p className="text-xs text-gray-400">Low Stock alerts</p>
-              </article>
-            </Link>
+            <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
+              <div className="absolute left-0 right-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-rose-400 to-red-500" />
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500">
+                <AlertTriangle size={18} />
+              </div>
+              <p className="mb-0.5 text-2xl font-semibold text-gray-900">{lowStockCount + outOfStockCount}</p>
+              <p className="text-xs text-gray-400">Low Stock alerts</p>
+            </article>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <div className="rounded-2xl border border-purple-100 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-gray-800">Recent sales</h2>

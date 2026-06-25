@@ -161,7 +161,7 @@ export default function ProductsPage() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90 md:py-2"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
         >
           <Plus size={16} />
           + Add Product
@@ -173,7 +173,7 @@ export default function ProductsPage() {
         <input
           type="text"
           placeholder="Search by name or SKU..."
-          className="h-11 w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-base text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200 md:text-sm"
+          className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200"
         />
       </div>
 
@@ -190,7 +190,7 @@ export default function ProductsPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-purple-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-sm">
         {loading ? (
           <div className="py-16 text-center text-sm text-gray-400">
             <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
@@ -202,24 +202,23 @@ export default function ProductsPage() {
             <p className="text-sm text-gray-400">No products yet</p>
           </div>
         ) : (
-          <table className="min-w-[980px]">
+          <table className="min-w-full">
             <thead className="bg-purple-50">
               <tr>
-                <th className="sticky left-0 z-10 bg-purple-50 px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">Name</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">SKU</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">Category</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">Unit</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">MRP (₹)</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">Selling Price (₹)</th>
-                <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400 md:table-cell">Brand</th>
-                <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400 md:table-cell">Low Stock At</th>
-                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400">Actions</th>
+                {TABLE_COLS.map((col) => (
+                  <th
+                    key={col}
+                    className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-purple-400"
+                  >
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {products.map((p) => (
                 <tr key={p.id} className="border-b border-gray-50 transition-colors hover:bg-purple-50/40">
-                  <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm text-gray-700">{p.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{p.name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{p.sku}</td>
                   <td className={`px-4 py-3 text-sm ${p.category ? "text-gray-700" : "text-gray-300"}`}>{p.category ?? "—"}</td>
                   <td className={`px-4 py-3 text-sm ${p.unit ? "text-gray-700" : "text-gray-300"}`}>{p.unit ?? "—"}</td>
@@ -229,23 +228,21 @@ export default function ProductsPage() {
                   <td className={`px-4 py-3 text-sm ${p.selling_price != null ? "text-gray-700" : "text-gray-300"}`}>
                     {p.selling_price != null ? `₹${p.selling_price}` : "—"}
                   </td>
-                  <td className={`hidden px-4 py-3 text-sm md:table-cell ${p.brand ? "text-gray-700" : "text-gray-300"}`}>{p.brand ?? "—"}</td>
-                  <td className="hidden px-4 py-3 text-sm text-gray-700 md:table-cell">{p.low_stock_at}</td>
+                  <td className={`px-4 py-3 text-sm ${p.brand ? "text-gray-700" : "text-gray-300"}`}>{p.brand ?? "—"}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{p.low_stock_at}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEdit(p)}
-                        className="rounded-lg p-2 text-purple-300 transition hover:bg-purple-50 hover:text-purple-600"
+                        className="rounded-lg p-1.5 text-purple-300 transition hover:bg-purple-50 hover:text-purple-600"
                         aria-label="Edit product"
-                        title="Edit"
                       >
                         <Pencil size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(p.id, p.name)}
-                        className="rounded-lg p-2 text-red-300 transition hover:bg-red-50 hover:text-red-500"
+                        className="rounded-lg p-1.5 text-red-300 transition hover:bg-red-50 hover:text-red-500"
                         aria-label="Delete product"
-                        title="Delete"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -266,8 +263,7 @@ export default function ProductsPage() {
             if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="w-full max-w-md rounded-t-2xl bg-white p-6 shadow-2xl md:rounded-2xl md:max-w-md max-md:fixed max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:max-h-[90vh] max-md:overflow-y-auto">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-200 md:hidden" />
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h2 className="mb-5 text-base font-semibold text-indigo-950">
               {editingId ? "Edit Product" : "Add Product"}
             </h2>
@@ -341,14 +337,14 @@ export default function ProductsPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-500 transition hover:bg-gray-50"
+                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-500 transition hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                  className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                 >
                   {submitting ? "Saving…" : editingId ? "Update Product" : "Add Product"}
                 </button>
@@ -401,7 +397,7 @@ function Field({
         onChange={onChange}
         required={required}
         min={type === "number" ? 0 : undefined}
-        className="h-11 w-full rounded-xl border border-purple-100 px-3 py-2.5 text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200 md:text-sm"
+        className="w-full rounded-xl border border-purple-100 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200"
       />
     </div>
   );
