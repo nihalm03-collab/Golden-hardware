@@ -42,10 +42,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const mobileNavItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/", label: "Home", icon: LayoutDashboard },
     { href: "/products", label: "Products", icon: Package },
     { href: "/stock", label: "Stock", icon: Layers },
     { href: "/sales", label: "Sales", icon: Receipt },
+    { href: "/revenue", label: "Revenue", icon: BarChart2 },
     { href: "/ledger", label: "Ledger", icon: BookOpen },
   ];
 
@@ -137,7 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-purple-100 bg-white px-2 py-2 pb-safe md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-purple-100 bg-white px-1 py-2 pb-safe md:hidden">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -146,12 +147,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1 ${
+                className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 ${
                   isActive ? "bg-purple-50 text-purple-600" : "text-gray-400"
                 }`}
               >
-                <Icon size={20} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <Icon size={18} />
+                <span className="text-[9px] font-medium">{item.label}</span>
               </Link>
             );
           })}
