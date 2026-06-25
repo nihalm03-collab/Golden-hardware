@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowDownCircle,
@@ -122,6 +122,7 @@ export default function LedgerPage() {
   const today = useMemo(() => getTodayDateStr(), []);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const [ledger, setLedger] = useState<DailyLedgerRow | null>(null);
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [salesTotal, setSalesTotal] = useState<number>(0);
@@ -346,24 +347,20 @@ export default function LedgerPage() {
 
         <div className="relative">
           <button
-            onClick={() => {
-              const input = document.getElementById("ledger-date-picker") as HTMLInputElement;
-              input?.showPicker?.();
-              input?.click();
-            }}
+            onClick={() => dateInputRef.current?.click()}
             className="cursor-pointer rounded-lg border border-purple-100 bg-white px-3 py-1.5 text-sm font-medium text-indigo-950 transition hover:bg-purple-50"
           >
             {formatReadableDate(selectedDate)}
           </button>
           <input
-            id="ledger-date-picker"
+            ref={dateInputRef}
             type="date"
             max={today}
             value={selectedDate}
             onChange={(e) => {
               if (e.target.value) setSelectedDate(e.target.value);
             }}
-            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           />
         </div>
 
