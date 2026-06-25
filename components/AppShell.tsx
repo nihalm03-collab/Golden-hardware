@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/sales", label: "Sales", icon: Receipt },
     { href: "/stock", label: "Stock", icon: Layers },
     { href: "/ledger", label: "Ledger", icon: BookOpen },
-    { href: "/revenue", label: "Revenue", icon: BarChart2 },
+    { href: "/history", label: "History", icon: ClipboardList },
   ];
 
   return (
@@ -145,6 +145,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 >
                   <Plus size={14} />
                   <span className="hidden sm:inline">New Sale</span>
+                </Link>
+                {/* Mobile-only quick links */}
+                <Link
+                  href="/revenue"
+                  className={`rounded-lg border p-2 transition-all md:hidden ${
+                    pathname === "/revenue"
+                      ? "border-purple-200 bg-purple-50 text-purple-600"
+                      : "border-purple-100 text-gray-400 hover:bg-purple-50 hover:text-purple-600"
+                  }`}
+                  aria-label="Revenue"
+                >
+                  <BarChart2 size={16} />
+                </Link>
+                <Link
+                  href="/settings"
+                  className={`rounded-lg border p-2 transition-all md:hidden ${
+                    pathname === "/settings"
+                      ? "border-purple-200 bg-purple-50 text-purple-600"
+                      : "border-purple-100 text-gray-400 hover:bg-purple-50 hover:text-purple-600"
+                  }`}
+                  aria-label="Settings"
+                >
+                  <Settings size={16} />
                 </Link>
                 <button
                   onClick={handleLogout}
