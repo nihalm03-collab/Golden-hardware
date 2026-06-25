@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Product } from "@/types";
+import { useToast } from "@/components/Toaster";
 
 type ProductForm = Omit<Product, "id" | "created_at">;
 
@@ -40,6 +41,7 @@ const TABLE_COLS = [
 ];
 
 export default function ProductsPage() {
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -136,6 +138,7 @@ export default function ProductsPage() {
 
     setSubmitting(false);
     closeModal();
+    toast(editingId ? "Product updated successfully!" : "Product added successfully!");
     await loadProducts();
   }
 
@@ -146,10 +149,9 @@ export default function ProductsPage() {
       .delete()
       .eq("id", id);
     if (deleteError) {
-      alert(`Delete failed: ${deleteError.message}`);
+      toast(`Delete failed: ${deleteError.message}`, "error");
       return;
-    }
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    }    toast(`"${name}" deleted.`, "info");    setProducts((prev) => prev.filter((p) => p.id !== id));
   }
 
   return (
@@ -165,7 +167,7 @@ export default function ProductsPage() {
           className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
         >
           <Plus size={16} />
-          + Add Product
+          Add Product
         </button>
       </div>
 

@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Product, Sale } from "@/types";
+import { BillPrintModal } from "@/components/BillPrintModal";
+import type { PrintBillData } from "@/components/BillPrintModal";
+import { useToast } from "@/components/Toaster";
 
 /* ── Local derived types ──────────────────────────────────────────── */
 type ProductWithStock = Product & { currentStock: number };
@@ -37,6 +40,7 @@ function fmtTime(iso: string) {
 /* ── Stat card ──────────────────────────────────────────────────── */
 /* ── Page ─────────────────────────────────────────────────────────── */
 export default function SalesPage() {
+  const { toast } = useToast();
   /* ── Today's bills ──────────────────────────────────────────────── */
   const [bills, setBills] = useState<BillRow[]>([]);
   const [loadingBills, setLoadingBills] = useState(true);
@@ -80,6 +84,7 @@ export default function SalesPage() {
   const [completing, setCompleting] = useState(false);
   const [saleError, setSaleError] = useState<string | null>(null);
   const [successBill, setSuccessBill] = useState<string | null>(null);
+  const [printBill, setPrintBill] = useState<PrintBillData | null>(null);
 
   /* ── Load today's bills ─────────────────────────────────────────── */
   const loadBills = useCallback(async () => {
@@ -247,7 +252,11 @@ export default function SalesPage() {
     setSaleError(null);
     setSuccessBill(null);
 
-    const billNumber = `S-${Date.now()}`;
+    // Generate sequential bill number
+    const { count } = await supabase
+      .from("sales")
+      .select("*", { count: "exact", head: true });
+    const billNumber = `S-${String((count ?? 0) + 1).padStart(4, "0")}`;
 
     // 1. Insert sale
     const { data: saleData, error: saleErr } = await supabase
@@ -300,8 +309,24 @@ export default function SalesPage() {
     setCart([]);
     setDiscount(0);
     setSuccessBill(billNumber);
+    toast(`Sale complete! Bill ${billNumber}`);
     setCompleting(false);
     await loadBills();
+
+    // Auto-open print modal for the just-completed sale
+    const completedBill: PrintBillData = {
+      bill_number: billNumber,
+      created_at: new Date().toISOString(),
+      total_amount: grandTotal,
+      discount,
+      items: cart.map((c) => ({
+        name: c.product.name,
+        qty: c.qty,
+        unit_price: c.product.selling_price ?? 0,
+        subtotal: (c.product.selling_price ?? 0) * c.qty,
+      })),
+    };
+    setPrintBill(completedBill);
   }
 
   /* ── Render ─────────────────────────────────────────────────────── */
@@ -524,7 +549,7 @@ export default function SalesPage() {
                       <Receipt className="h-5 w-5" />
                     </div>
 
-                    <div className="flex-1 text-left">
+                  <div className="flex-1 text-left">
                       <p className="text-sm font-medium text-gray-800">
                         {bill.bill_number}
                       </p>
@@ -535,11 +560,27 @@ export default function SalesPage() {
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">
-                        ₹{(bill.total_amount ?? 0).toFixed(2)}
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-gray-400">{fmtTime(bill.created_at)}</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPrintBill({
+                            bill_number: bill.bill_number,
+                            created_at: bill.created_at,
+                            total_amount: bill.total_amount ?? 0,
+                            discount: bill.discount ?? 0,
+                            items: bill.items,
+                          });
+                        }}
+                        className="rounded-lg border border-purple-100 px-2 py-1 text-[10px] font-medium text-purple-500 transition hover:bg-purple-50"
+                      >
+                        Print
+                      </button>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          ₹{(bill.total_amount ?? 0).toFixed(2)}
+                        </p>
+                      </div>
                     </div>
                   </button>
 
@@ -595,6 +636,11 @@ export default function SalesPage() {
           )}
         </div>
       </div>
+
+      {/* Bill print modal */}
+      {printBill && (
+        <BillPrintModal bill={printBill} onClose={() => setPrintBill(null)} />
+      )}
     </section>
   );
 }

@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/Toaster";
 
 type DailyLedgerRow = {
   id: string;
@@ -123,6 +124,7 @@ function categoryMeta(category: ExpenseCategory) {
 }
 
 export default function LedgerPage() {
+  const { toast } = useToast();
   const today = useMemo(() => getTodayDateStr(), []);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -165,8 +167,10 @@ export default function LedgerPage() {
     setLoading(true);
     setError(null);
 
-    const startIso = `${selectedDate}T00:00:00`;
-    const endIso = `${selectedDate}T23:59:59.999`;
+    // Use IST timezone offset (+05:30) so Supabase gets the correct UTC range.
+    // Without this, sales made before 05:30 AM IST fall on the previous UTC day.
+    const startIso = new Date(`${selectedDate}T00:00:00+05:30`).toISOString();
+    const endIso = new Date(`${selectedDate}T23:59:59.999+05:30`).toISOString();
 
     const [ledgerRes, expenseRes, salesRes] = await Promise.all([
       supabase.from("daily_ledger").select("*").eq("date", selectedDate).maybeSingle(),
@@ -285,6 +289,7 @@ export default function LedgerPage() {
 
     setSubmittingLedger(false);
     setShowLedgerModal(false);
+    toast("Day setup saved!");
     await loadPageData();
   }
 
@@ -315,6 +320,7 @@ export default function LedgerPage() {
 
     setSubmittingExpense(false);
     setShowExpenseModal(false);
+    toast("Expense added!");
     setExpenseForm({
       category: "purchase",
       amount: 0,

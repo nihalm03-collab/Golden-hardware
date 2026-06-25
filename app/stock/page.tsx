@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Product, InventoryLog } from "@/types";
+import { useToast } from "@/components/Toaster";
 
 /* ── Derived row type ──────────────────────────────────────────────── */
 type StockRow = Product & {
@@ -57,6 +58,7 @@ function formatDate(iso: string | null) {
 /* ── Stat card ─────────────────────────────────────────────────────── */
 /* ── Main page ─────────────────────────────────────────────────────── */
 export default function StockPage() {
+  const { toast } = useToast();
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,6 +183,7 @@ export default function StockPage() {
 
     setSubmitting(false);
     closeModal();
+    toast(`Stock updated for ${target.name}!`);
     await loadStock();
   }
 
