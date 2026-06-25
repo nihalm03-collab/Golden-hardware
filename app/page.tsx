@@ -201,7 +201,7 @@ export default function DashboardPage() {
                 <TrendingUp size={18} />
               </div>
               <p className="mb-0.5 text-2xl font-semibold text-gray-900">₹{todayRevenue.toFixed(2)}</p>
-              <p className="text-xs text-gray-400">Today's Revenue</p>
+              <p className="text-xs text-gray-400">Today&apos;s Revenue</p>
             </article>
 
             <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
@@ -210,7 +210,7 @@ export default function DashboardPage() {
                 <ShoppingCart size={18} />
               </div>
               <p className="mb-0.5 text-2xl font-semibold text-gray-900">{todayTransactions}</p>
-              <p className="text-xs text-gray-400">Today's Transactions</p>
+              <p className="text-xs text-gray-400">Today&apos;s Transactions</p>
             </article>
 
             <article className="relative overflow-hidden rounded-2xl border border-purple-100 bg-white p-5">
