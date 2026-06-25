@@ -157,13 +157,24 @@ export default function SalesPage() {
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
 
-      const { data: products } = await supabase
-        .from("products")
-        .select("*")
-        .or(`name.ilike.%${q}%,sku.ilike.%${q}%`)
-        .limit(10);
+      const [nameRes, skuRes] = await Promise.all([
+        supabase.from("products").select("*").ilike("name", `%${q}%`).limit(10),
+        supabase.from("products").select("*").ilike("sku", `%${q}%`).limit(10),
+      ]);
 
-      if (!products || products.length === 0) {
+      const seen = new Set<string>();
+      const products: Product[] = [];
+      for (const p of [
+        ...((skuRes.data ?? []) as Product[]),
+        ...((nameRes.data ?? []) as Product[]),
+      ]) {
+        if (!seen.has(p.id)) {
+          seen.add(p.id);
+          products.push(p);
+        }
+      }
+
+      if (products.length === 0) {
         setSearchResults([]);
         setSearching(false);
         return;

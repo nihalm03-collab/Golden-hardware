@@ -41,6 +41,7 @@ const TABLE_COLS = [
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -173,6 +174,8 @@ export default function ProductsPage() {
         <input
           type="text"
           placeholder="Search by name or SKU..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200"
         />
       </div>
@@ -216,7 +219,16 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
+              {products
+                .filter((p) => {
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    q === "" ||
+                    p.name.toLowerCase().includes(q) ||
+                    p.sku.toLowerCase().includes(q)
+                  );
+                })
+                .map((p) => (
                 <tr key={p.id} className="border-b border-gray-50 transition-colors hover:bg-purple-50/40">
                   <td className="px-4 py-3 text-sm text-gray-700">{p.name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{p.sku}</td>
