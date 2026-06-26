@@ -28,7 +28,9 @@ type DerivedProductStock = {
 
 function getTodayStartIso() {
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return new Date(`${dateStr}T00:00:00+05:30`).toISOString();
 }
 
 function formatTime(iso: string) {
@@ -55,8 +57,8 @@ export default function DashboardPage() {
       const todayStartIso = getTodayStartIso();
 
       const [productsRes, logsRes, salesRes] = await Promise.all([
-        supabase.from("products").select("*"),
-        supabase.from("inventory_log").select("*"),
+        supabase.from("products").select("id, name, sku, unit, low_stock_at").limit(2000),
+        supabase.from("inventory_log").select("product_id, change_qty").limit(10000),
         supabase
           .from("sales")
           .select("*")

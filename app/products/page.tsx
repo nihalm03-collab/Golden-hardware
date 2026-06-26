@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
+const PAGE_SIZE = 50;
 import {
   AlertCircle,
   Loader2,
@@ -43,7 +45,10 @@ const TABLE_COLS = [
 export default function ProductsPage() {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,21 +58,41 @@ export default function ProductsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (q: string, pg: number) => {
     setLoading(true);
     setError(null);
-    const { data, error: fetchError } = await supabase
+    const from = pg * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    let qb = supabase
       .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("*", { count: "exact" })
+      .order("name", { ascending: true })
+      .range(from, to);
+    if (q.trim()) {
+      qb = qb.or(`name.ilike.%${q.trim()}%,sku.ilike.%${q.trim()}%`);
+    }
+    const { data, error: fetchError, count } = await qb;
     if (fetchError) setError(fetchError.message);
-    else setProducts(data ?? []);
+    else {
+      setProducts(data ?? []);
+      setTotalCount(count ?? 0);
+    }
     setLoading(false);
   }, []);
 
+  // Debounce search — resets to page 0
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    const t = setTimeout(() => {
+      setDebouncedQuery(query);
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Load when debounced query or page changes
+  useEffect(() => {
+    loadProducts(debouncedQuery, page);
+  }, [debouncedQuery, page, loadProducts]);
 
   function openAdd() {
     setEditingId(null);
@@ -139,7 +164,7 @@ export default function ProductsPage() {
     setSubmitting(false);
     closeModal();
     toast(editingId ? "Product updated successfully!" : "Product added successfully!");
-    await loadProducts();
+    await loadProducts(debouncedQuery, page);
   }
 
   async function handleDelete(id: string, name: string) {
@@ -151,7 +176,13 @@ export default function ProductsPage() {
     if (deleteError) {
       toast(`Delete failed: ${deleteError.message}`, "error");
       return;
-    }    toast(`"${name}" deleted.`, "info");    setProducts((prev) => prev.filter((p) => p.id !== id));
+    }    toast(`"${name}" deleted.`, "info");
+    // If we deleted the last item on a non-first page, go back one page
+    const newTotal = totalCount - 1;
+    const maxPage = Math.max(0, Math.ceil(newTotal / PAGE_SIZE) - 1);
+    const targetPage = Math.min(page, maxPage);
+    if (targetPage !== page) setPage(targetPage);
+    else await loadProducts(debouncedQuery, page);
   }
 
   return (
@@ -176,14 +207,14 @@ export default function ProductsPage() {
         <input
           type="text"
           placeholder="Search by name or SKU..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200"
         />
       </div>
 
-      <div className="mb-4 flex gap-6 text-xs text-gray-500">
-        <p>Total: {products.length} products</p>
+      <div className="mb-4 flex items-center gap-6 text-xs text-gray-500">
+        <p>{totalCount} product{totalCount !== 1 ? "s" : ""}{debouncedQuery ? ` matching "${debouncedQuery}"` : ""}</p>
       </div>
 
       {/* Error banner */}
@@ -221,16 +252,7 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {products
-                .filter((p) => {
-                  const q = searchQuery.toLowerCase();
-                  return (
-                    q === "" ||
-                    p.name.toLowerCase().includes(q) ||
-                    p.sku.toLowerCase().includes(q)
-                  );
-                })
-                .map((p) => (
+              {products.map((p) => (
                 <tr key={p.id} className="border-b border-gray-50 transition-colors hover:bg-purple-50/40">
                   <td className="px-4 py-3 text-sm text-gray-700">{p.name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{p.sku}</td>
@@ -268,6 +290,31 @@ export default function ProductsPage() {
           </table>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalCount > PAGE_SIZE && (
+        <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+          <span>
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} of {totalCount}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="rounded-lg border border-purple-100 bg-white px-3 py-1.5 transition hover:bg-purple-50 disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={(page + 1) * PAGE_SIZE >= totalCount}
+              className="rounded-lg border border-purple-100 bg-white px-3 py-1.5 transition hover:bg-purple-50 disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       {modalOpen && (

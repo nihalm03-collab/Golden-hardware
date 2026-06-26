@@ -9,9 +9,12 @@ import {
   Loader2,
   PackageOpen,
   Plus,
+  Search,
   X,
   XCircle,
 } from "lucide-react";
+
+const PAGE_SIZE = 50;
 import { supabase } from "@/lib/supabase";
 import type { Product, InventoryLog } from "@/types";
 import { useToast } from "@/components/Toaster";
@@ -62,6 +65,10 @@ export default function StockPage() {
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   /* restock modal */
   const [target, setTarget] = useState<RestockTarget | null>(null);
@@ -70,15 +77,23 @@ export default function StockPage() {
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  const loadStock = useCallback(async () => {
+  const loadStock = useCallback(async (q: string, pg: number) => {
     setLoading(true);
     setError(null);
 
-    /* fetch all products */
-    const { data: products, error: pErr } = await supabase
+    const from = pg * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    let pQuery = supabase
       .from("products")
-      .select("*")
-      .order("name", { ascending: true });
+      .select("*", { count: "exact" })
+      .order("name", { ascending: true })
+      .range(from, to);
+    if (q.trim()) {
+      pQuery = pQuery.or(`name.ilike.%${q.trim()}%,sku.ilike.%${q.trim()}%`);
+    }
+
+    const { data: products, error: pErr, count } = await pQuery;
 
     if (pErr || !products) {
       setError(pErr?.message ?? "Failed to load products.");
@@ -86,10 +101,20 @@ export default function StockPage() {
       return;
     }
 
-    /* fetch all inventory_log rows */
+    setTotalCount(count ?? 0);
+
+    if (products.length === 0) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
+
+    // Fetch inventory_log only for this page's product IDs
+    const productIds = (products as Product[]).map((p) => p.id);
     const { data: logs, error: lErr } = await supabase
       .from("inventory_log")
-      .select("product_id, change_qty, created_at");
+      .select("product_id, change_qty, created_at")
+      .in("product_id", productIds);
 
     if (lErr) {
       setError(lErr.message);
@@ -102,22 +127,11 @@ export default function StockPage() {
       "product_id" | "change_qty" | "created_at"
     >[];
 
-    /* aggregate per product */
-    const stockMap = new Map<
-      string,
-      { total: number; lastUpdated: string | null }
-    >();
-
+    const stockMap = new Map<string, { total: number; lastUpdated: string | null }>();
     for (const log of typedLogs) {
-      const existing = stockMap.get(log.product_id) ?? {
-        total: 0,
-        lastUpdated: null,
-      };
+      const existing = stockMap.get(log.product_id) ?? { total: 0, lastUpdated: null };
       existing.total += log.change_qty;
-      if (
-        !existing.lastUpdated ||
-        log.created_at > existing.lastUpdated
-      ) {
+      if (!existing.lastUpdated || log.created_at > existing.lastUpdated) {
         existing.lastUpdated = log.created_at;
       }
       stockMap.set(log.product_id, existing);
@@ -137,11 +151,20 @@ export default function StockPage() {
     setLoading(false);
   }, []);
 
+  // Debounce search
   useEffect(() => {
-    loadStock();
-  }, [loadStock]);
+    const t = setTimeout(() => {
+      setDebouncedQuery(query);
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
 
-  /* stat card counts */
+  useEffect(() => {
+    loadStock(debouncedQuery, page);
+  }, [debouncedQuery, page, loadStock]);
+
+  /* stat card counts (from current page) */
   const inStock = rows.filter((r) => r.status === "in-stock").length;
   const lowStock = rows.filter((r) => r.status === "low-stock").length;
   const outOfStock = rows.filter((r) => r.status === "out-of-stock").length;
@@ -184,7 +207,7 @@ export default function StockPage() {
     setSubmitting(false);
     closeModal();
     toast(`Stock updated for ${target.name}!`);
-    await loadStock();
+    await loadStock(debouncedQuery, page);
   }
 
   return (
@@ -211,7 +234,7 @@ export default function StockPage() {
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-xl border border-purple-100 bg-white p-4">
           <Layers className="text-indigo-950" size={18} />
-          <p className="mt-2 text-xl font-semibold text-indigo-950">{rows.length}</p>
+          <p className="mt-2 text-xl font-semibold text-indigo-950">{totalCount}</p>
           <p className="mt-1 text-xs text-gray-400">Total</p>
         </article>
         <article className="rounded-xl border border-purple-100 bg-white p-4">
@@ -229,6 +252,18 @@ export default function StockPage() {
           <p className="mt-2 text-xl font-semibold text-red-500">{outOfStock}</p>
           <p className="mt-1 text-xs text-gray-400">Out of stock</p>
         </article>
+      </div>
+
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-300" />
+        <input
+          type="text"
+          placeholder="Search by name or SKU..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 pl-9 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-200"
+        />
       </div>
 
       {/* Table */}
@@ -332,6 +367,31 @@ export default function StockPage() {
           </table>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalCount > PAGE_SIZE && (
+        <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+          <span>
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} of {totalCount}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="rounded-lg border border-purple-100 bg-white px-3 py-1.5 transition hover:bg-purple-50 disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={(page + 1) * PAGE_SIZE >= totalCount}
+              className="rounded-lg border border-purple-100 bg-white px-3 py-1.5 transition hover:bg-purple-50 disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Restock modal */}
       {target && (

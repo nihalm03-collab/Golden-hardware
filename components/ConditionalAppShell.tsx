@@ -16,22 +16,27 @@ export function ConditionalAppShell({ children }: { children: React.ReactNode })
   useEffect(() => {
     let mounted = true;
 
-    // onAuthStateChange fires immediately with the current session state
-    // (INITIAL_SESSION event) AND on every subsequent change (SIGNED_IN,
-    // SIGNED_OUT, TOKEN_REFRESHED). Using this as the single source of truth
-    // avoids the race condition where getSession() resolves before the
-    // Supabase client has persisted the session from a fresh login.
+    // Immediately resolve session — no waiting for an event
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (!session && pathname !== "/login") {
+        router.replace("/login");
+      } else if (session && pathname === "/login") {
+        router.replace("/");
+      } else {
+        setReady(true);
+      }
+    });
+
+    // Also watch for subsequent sign-in / sign-out events
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-
-      if (session && pathname === "/login") {
-        router.replace("/");
-      } else if (!session && pathname !== "/login") {
+      if (!session && pathname !== "/login") {
         router.replace("/login");
-      } else {
-        setReady(true);
+      } else if (session && pathname === "/login") {
+        router.replace("/");
       }
     });
 
