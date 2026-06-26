@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { BarChart2, ShoppingCart, TrendingUp } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Sale, SaleItem } from "@/types";
+import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 type SaleItemJoined = SaleItem & {
   products:
@@ -47,15 +49,14 @@ function last7Days(): { dateKey: string; label: string }[] {
 
 /* ── page ──────────────────────────────────────────────────────────── */
 export default function RevenuePage() {
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
   const [saleItems, setSaleItems] = useState<SaleItemJoined[]>([]);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      setError(null);
 
       const [salesRes, itemsRes] = await Promise.all([
         supabase
@@ -67,7 +68,7 @@ export default function RevenuePage() {
       ]);
 
       if (salesRes.error || itemsRes.error) {
-        setError(salesRes.error?.message ?? itemsRes.error?.message ?? "Failed to load data.");
+        toast(friendlyError(salesRes.error?.message ?? itemsRes.error?.message ?? "Failed to load data."), "error");
         setLoading(false);
         return;
       }
@@ -133,12 +134,6 @@ export default function RevenuePage() {
         <h1 className="text-xl font-semibold text-indigo-950">Revenue</h1>
         <p className="mt-1 text-sm text-gray-400">Sales performance and product insights</p>
       </div>
-
-      {error && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
 
       {loading ? (
         <div className="rounded-2xl border border-purple-100 bg-white p-6 text-sm text-slate-600">

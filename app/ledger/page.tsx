@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertCircle,
   ArrowDownCircle,
   ArrowUpCircle,
   Banknote,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 type DailyLedgerRow = {
   id: string;
@@ -133,7 +133,6 @@ export default function LedgerPage() {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [salesTotal, setSalesTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showLedgerModal, setShowLedgerModal] = useState(false);
@@ -165,7 +164,6 @@ export default function LedgerPage() {
 
   const loadPageData = useCallback(async () => {
     setLoading(true);
-    setError(null);
 
     // Use IST timezone offset (+05:30) so Supabase gets the correct UTC range.
     // Without this, sales made before 05:30 AM IST fall on the previous UTC day.
@@ -187,11 +185,14 @@ export default function LedgerPage() {
     ]);
 
     if (ledgerRes.error || expenseRes.error || salesRes.error) {
-      setError(
-        ledgerRes.error?.message ??
-          expenseRes.error?.message ??
-          salesRes.error?.message ??
-          "Failed to load ledger data.",
+      toast(
+        friendlyError(
+          ledgerRes.error?.message ??
+            expenseRes.error?.message ??
+            salesRes.error?.message ??
+            "Failed to load ledger data.",
+        ),
+        "error",
       );
       setLoading(false);
       return;
@@ -266,7 +267,6 @@ export default function LedgerPage() {
   async function saveLedgerSetup(e: React.FormEvent) {
     e.preventDefault();
     setSubmittingLedger(true);
-    setError(null);
 
     const payload = {
       date: selectedDate,
@@ -282,7 +282,7 @@ export default function LedgerPage() {
       .upsert(payload, { onConflict: "date" });
 
     if (upsertError) {
-      setError(upsertError.message);
+      toast(friendlyError(upsertError.message), "error");
       setSubmittingLedger(false);
       return;
     }
@@ -296,12 +296,11 @@ export default function LedgerPage() {
   async function addExpense(e: React.FormEvent) {
     e.preventDefault();
     if (expenseForm.amount <= 0) {
-      setError("Expense amount must be greater than 0.");
+      toast("Expense amount must be greater than 0.", "error");
       return;
     }
 
     setSubmittingExpense(true);
-    setError(null);
 
     const { error: insertError } = await supabase.from("expenses").insert({
       date: selectedDate,
@@ -313,7 +312,7 @@ export default function LedgerPage() {
     });
 
     if (insertError) {
-      setError(insertError.message);
+      toast(friendlyError(insertError.message), "error");
       setSubmittingExpense(false);
       return;
     }
@@ -337,7 +336,7 @@ export default function LedgerPage() {
 
     const { error: deleteErr } = await supabase.from("expenses").delete().eq("id", expenseId);
     if (deleteErr) {
-      setError(deleteErr.message);
+      toast(friendlyError(deleteErr.message), "error");
       return;
     }
 
@@ -398,13 +397,6 @@ export default function LedgerPage() {
           <ChevronRight size={16} className={isToday ? "text-gray-300" : "text-gray-600"} />
         </button>
       </div>
-
-      {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
-          <AlertCircle size={16} />
-          {error}
-        </div>
-      )}
 
       {loading ? (
         <div className="rounded-2xl border border-purple-100 bg-white py-16 text-center text-sm text-gray-400">

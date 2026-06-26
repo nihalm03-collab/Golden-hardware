@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  AlertCircle,
-  CheckCircle,
   Loader2,
   PackageOpen,
   Receipt,
@@ -15,6 +13,7 @@ import type { Product, Sale } from "@/types";
 import { BillPrintModal } from "@/components/BillPrintModal";
 import type { PrintBillData } from "@/components/BillPrintModal";
 import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 /* ── Local derived types ──────────────────────────────────────────── */
 type ProductWithStock = Product & { currentStock: number };
@@ -82,8 +81,6 @@ export default function SalesPage() {
 
   /* ── Sale state ─────────────────────────────────────────────────── */
   const [completing, setCompleting] = useState(false);
-  const [saleError, setSaleError] = useState<string | null>(null);
-  const [successBill, setSuccessBill] = useState<string | null>(null);
   const [printBill, setPrintBill] = useState<PrintBillData | null>(null);
 
   /* ── Load today's bills ─────────────────────────────────────────── */
@@ -224,8 +221,6 @@ export default function SalesPage() {
     });
     setQuery("");
     setSearchResults([]);
-    setSaleError(null);
-    setSuccessBill(null);
   }
 
   function adjustQty(productId: string, delta: number) {
@@ -245,12 +240,10 @@ export default function SalesPage() {
   /* ── Complete sale ───────────────────────────────────────────────── */
   async function completeSale() {
     if (cart.length === 0) {
-      setSaleError("Add at least one product to the cart.");
+      toast("Add at least one product to the cart.", "error");
       return;
     }
     setCompleting(true);
-    setSaleError(null);
-    setSuccessBill(null);
 
     // Generate sequential bill number
     const { count } = await supabase
@@ -266,7 +259,7 @@ export default function SalesPage() {
       .single();
 
     if (saleErr || !saleData) {
-      setSaleError(saleErr?.message ?? "Failed to create sale.");
+      toast(friendlyError(saleErr?.message ?? "Failed to create sale."), "error");
       setCompleting(false);
       return;
     }
@@ -285,7 +278,7 @@ export default function SalesPage() {
     );
 
     if (itemsErr) {
-      setSaleError(itemsErr.message);
+      toast(friendlyError(itemsErr.message), "error");
       setCompleting(false);
       return;
     }
@@ -301,14 +294,13 @@ export default function SalesPage() {
     );
 
     if (logErr) {
-      setSaleError(logErr.message);
+      toast(friendlyError(logErr.message), "error");
       setCompleting(false);
       return;
     }
 
     setCart([]);
     setDiscount(0);
-    setSuccessBill(billNumber);
     toast(`Sale complete! Bill ${billNumber}`);
     setCompleting(false);
     await loadBills();
@@ -488,20 +480,6 @@ export default function SalesPage() {
             </div>
           )}
 
-          {/* Feedback */}
-          {saleError && (
-            <p className="mt-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
-              <AlertCircle size={16} />
-              {saleError}
-            </p>
-          )}
-          {successBill && (
-            <p className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-              <CheckCircle size={16} />
-              Sale complete! Bill:{" "}
-              <strong className="font-semibold">{successBill}</strong>
-            </p>
-          )}
 
           <button
             onClick={completeSale}

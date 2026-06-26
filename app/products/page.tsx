@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { Product } from "@/types";
 import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 type ProductForm = Omit<Product, "id" | "created_at">;
 
@@ -156,7 +157,7 @@ export default function ProductsPage() {
     }
 
     if (dbError) {
-      setFormError(dbError.message);
+      setFormError(friendlyError(dbError.message));
       setSubmitting(false);
       return;
     }
@@ -174,7 +175,7 @@ export default function ProductsPage() {
       .delete()
       .eq("id", id);
     if (deleteError) {
-      toast(`Delete failed: ${deleteError.message}`, "error");
+      toast(`Delete failed: ${friendlyError(deleteError.message)}`, "error");
       return;
     }    toast(`"${name}" deleted.`, "info");
     // If we deleted the last item on a non-first page, go back one page

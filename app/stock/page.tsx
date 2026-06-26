@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  AlertCircle,
   AlertTriangle,
   CheckCircle,
   Layers,
@@ -18,6 +17,7 @@ const PAGE_SIZE = 50;
 import { supabase } from "@/lib/supabase";
 import type { Product, InventoryLog } from "@/types";
 import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 /* ── Derived row type ──────────────────────────────────────────────── */
 type StockRow = Product & {
@@ -64,7 +64,6 @@ export default function StockPage() {
   const { toast } = useToast();
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -79,7 +78,6 @@ export default function StockPage() {
 
   const loadStock = useCallback(async (q: string, pg: number) => {
     setLoading(true);
-    setError(null);
 
     const from = pg * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -96,7 +94,7 @@ export default function StockPage() {
     const { data: products, error: pErr, count } = await pQuery;
 
     if (pErr || !products) {
-      setError(pErr?.message ?? "Failed to load products.");
+      toast(friendlyError(pErr?.message ?? "Failed to load products."), "error");
       setLoading(false);
       return;
     }
@@ -117,7 +115,7 @@ export default function StockPage() {
       .in("product_id", productIds);
 
     if (lErr) {
-      setError(lErr.message);
+      toast(friendlyError(lErr.message), "error");
       setLoading(false);
       return;
     }
@@ -199,7 +197,7 @@ export default function StockPage() {
     });
 
     if (insertErr) {
-      setModalError(insertErr.message);
+      setModalError(friendlyError(insertErr.message));
       setSubmitting(false);
       return;
     }
@@ -221,14 +219,6 @@ export default function StockPage() {
         </p>
         </div>
       </div>
-
-      {/* Error banner */}
-      {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
-          <AlertCircle size={16} />
-          {error}
-        </div>
-      )}
 
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -407,8 +397,7 @@ export default function StockPage() {
 
             <form onSubmit={handleRestock} className="px-6 py-5 space-y-4">
               {modalError && (
-                <p className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
-                  <AlertCircle size={16} />
+                <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
                   {modalError}
                 </p>
               )}
