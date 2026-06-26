@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   BarChart2,
   BookOpen,
@@ -37,11 +37,11 @@ function formatTodayDate() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    router.replace("/login");
+    // Force a full reload so middleware re-evaluates and clears any cached state
+    window.location.href = "/login";
   }
 
   const mobileNavItems = [
