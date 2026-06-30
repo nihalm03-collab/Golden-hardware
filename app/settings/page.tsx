@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  AlertCircle,
   Building2,
   FileText,
   Loader2,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toaster";
+import { friendlyError } from "@/lib/errors";
 
 type ShopSettings = {
   id: number;
@@ -35,7 +35,6 @@ export default function SettingsPage() {
   const [form, setForm] = useState<Omit<ShopSettings, "id">>(DEFAULT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -47,7 +46,7 @@ export default function SettingsPage() {
         .maybeSingle();
 
       if (fetchErr) {
-        setError(fetchErr.message);
+        toast(friendlyError(fetchErr.message), "error");
       } else if (data) {
         const row = data as ShopSettings;
         setForm({
@@ -66,7 +65,6 @@ export default function SettingsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     const { error: upsertErr } = await supabase.from("shop_settings").upsert(
       { id: 1, ...form },
@@ -74,7 +72,7 @@ export default function SettingsPage() {
     );
 
     if (upsertErr) {
-      setError(upsertErr.message);
+      toast(friendlyError(upsertErr.message), "error");
     } else {
       toast("Settings saved successfully!");
     }
@@ -97,13 +95,6 @@ export default function SettingsPage() {
           <p className="text-sm text-gray-400">Configure your shop details</p>
         </div>
       </div>
-
-      {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
-          <AlertCircle size={16} />
-          {error}
-        </div>
-      )}
 
       {loading ? (
         <div className="rounded-2xl border border-purple-100 bg-white py-16 text-center text-sm text-gray-400">

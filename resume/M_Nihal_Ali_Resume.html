@@ -1,0 +1,139 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>M Nihal Ali — Junior AI Engineer</title>
+<style>
+  @page { size: A4; margin: 7mm 11mm 7mm 11mm; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: Arial, "Segoe UI", sans-serif;
+    color: #1a1a1a;
+    font-size: 9pt;
+    line-height: 1.2;
+  }
+  a { color: #1a4f8a; text-decoration: none; }
+  h1 { font-size: 15.5pt; margin: 0 0 1px 0; text-align: center; font-weight: 700; }
+  .tagline { text-align: center; font-size: 8.8pt; color: #333; margin-bottom: 1px; }
+  .contact { text-align: center; font-size: 8.4pt; color: #333; margin-bottom: 4px; }
+  .contact span { margin: 0 3px; }
+  h2 {
+    font-size: 9.4pt; text-transform: uppercase;
+    border-bottom: 1px solid #1a1a1a; padding-bottom: 1px;
+    margin: 4px 0 2px 0; font-weight: 700;
+  }
+  .role-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; }
+  .role-title { font-weight: 700; font-size: 9.2pt; }
+  .role-date { font-size: 8.4pt; color: #444; font-style: italic; }
+  ul { margin: 1px 0 2px 0; padding-left: 13px; }
+  li { margin-bottom: 0.5px; }
+  .proj-tech { font-style: italic; color: #444; font-size: 8.2pt; margin: 0 0 1px 0; }
+  .skills-table { width: 100%; border-collapse: collapse; margin-top: 1px; }
+  .skills-table td { padding: 0.5px 3px; vertical-align: top; font-size: 8.6pt; }
+  .skills-table td.label { font-weight: 700; width: 18%; white-space: nowrap; }
+  .edu-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .cert-inline { font-size: 8.6pt; margin: 2px 0 0 0; }
+  p.summary { margin: 0; }
+</style>
+</head>
+<body>
+
+<h1>M NIHAL ALI</h1>
+<div class="tagline">Junior AI Engineer &mdash; LLM Pipelines &middot; Multi-Agent Systems &middot; Production ML</div>
+<div class="contact">
+  Kozhikode, Kerala &nbsp;|&nbsp; Relocating to Bangalore <span>|</span>
+  +91 90371 85443 <span>|</span>
+  <a href="mailto:nihalm03@gmail.com">nihalm03@gmail.com</a> <span>|</span>
+  <a href="https://linkedin.com/in/m-nihal-ali">linkedin.com/in/m-nihal-ali</a> <span>|</span>
+  <a href="https://github.com/nihalm03-collab">github.com/nihalm03-collab</a>
+</div>
+
+<h2>Summary</h2>
+<p class="summary">AI Engineer with 1+ year designing and deploying LLM-powered voice and automation systems in Python. Built multi-agent architectures on Azure OpenAI and Google Gemini, deployed 7-microservice platforms on Docker and Azure, and shipped full-stack products using Next.js and Supabase.</p>
+
+<h2>Experience</h2>
+
+<div class="role-row">
+  <span class="role-title">Junior AI Engineer &mdash; Codely.ai (DialoGen Platform), Kozhikode</span>
+  <span class="role-date">Jan 2026 &ndash; Present</span>
+</div>
+<ul>
+  <li>Ship production LLM pipelines on <b>Azure OpenAI (GPT-4o)</b> and <b>Google Gemini</b>, handling 1,000+ real-time voice conversations/month with automatic provider failover.</li>
+  <li>Build a <b>provider-agnostic AI engine</b> abstracting <b>5 STT, 3 TTS, and 2 LLM</b> services with zero-downtime model swaps via config.</li>
+  <li>Implement <b>multi-agent Generator + Critic loops (LangChain)</b> for script generation, cutting manual revision cycles by <b>~3x</b> using LLM-driven feedback loops.</li>
+  <li>Engineer <b>Generative AI</b> prompt pipelines with Pydantic validation, guardrails, and <b>RAG</b>-ready retrieval hooks, reducing invalid/hallucinated responses by <b>~50%</b>; deploy 7 microservices via Docker and Azure Pipelines CI/CD.</li>
+</ul>
+
+<div class="role-row">
+  <span class="role-title">AI/ML Engineer Intern &mdash; Luminar Technolab, Kochi</span>
+  <span class="role-date">Jun 2025 &ndash; Jan 2026</span>
+</div>
+<ul>
+  <li>Fine-tuned NLP models with <b>scikit-learn, TensorFlow, and Hugging Face Transformers</b> across 10+ datasets, achieving <b>90%+ accuracy</b>; built XGBoost classifiers and Power BI / Streamlit dashboards.</li>
+  <li>Developed core modules of an early-stage GenAI voice prototype, integrating STT/TTS APIs with LLM inference in a low-latency audio pipeline.</li>
+</ul>
+
+<h2>Projects</h2>
+
+<div class="role-row">
+  <span class="role-title">AI Cold Caller Simulator</span>
+  <span class="role-date">2026</span>
+</div>
+<div class="proj-tech">Python, FastAPI, Gemini, ElevenLabs, Sarvam STT, LangChain</div>
+<ul>
+  <li>Voice-based sales training simulator with a Hindi-speaking AI prospect &ldquo;Raj Sharma&rdquo; &mdash; <b>7+ objection scenarios</b>, Hinglish persona, and a STT/TTS pipeline with <b>&lt;800ms response latency</b>.</li>
+  <li>Designed state-machine prompting on Gemini for natural objection handling; integrated Sarvam STT and ElevenLabs TTS for native Hinglish voice rendering.</li>
+</ul>
+
+<div class="role-row">
+  <span class="role-title">DialoGen &mdash; Generative AI Voice Platform</span>
+  <span class="role-date">2025</span>
+</div>
+<div class="proj-tech">Python, FastAPI, LangChain, Azure OpenAI, Gemini, Pipecat, Twilio, RabbitMQ, Docker, Next.js, Prisma</div>
+<ul>
+  <li>Production voice AI system: LLM conversations, agentic script orchestration, CRM integrations, and enterprise campaign management across <b>7 microservices</b>.</li>
+  <li>Architected RabbitMQ-based message bus connecting Twilio telephony, Pipecat audio pipeline, and LangChain agents; reduced inter-service latency by <b>~40%</b>.</li>
+</ul>
+
+<div class="role-row">
+  <span class="role-title">AI-SDR &mdash; Automated Sales Development Platform</span>
+  <span class="role-date">2025</span>
+</div>
+<div class="proj-tech">Python, FastAPI, Next.js, TypeScript, Prisma, RabbitMQ, LangChain, Docker, Azure Pipelines</div>
+<ul>
+  <li>AI-powered SDR platform with lead scoring, schedule-compliant outreach, AI-driven campaign execution, and <b>sub-60s speed-to-lead</b> across <b>3+ enterprise tenants</b>.</li>
+  <li>Built Next.js + Prisma dashboard for campaign metrics, lead pipeline visualization, and per-tenant compliance configuration.</li>
+</ul>
+
+<div class="role-row">
+  <span class="role-title">Golden Hardwares &mdash; Inventory &amp; Sales Management Web App</span>
+  <span class="role-date">2026</span>
+</div>
+<div class="proj-tech">Next.js 14, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, RLS)</div>
+<ul>
+  <li>Web application managing <b>200+ SKUs</b>: inventory, billing, ledger, bill printing, revenue analytics, and audit history secured with <b>Supabase Auth + Row-Level Security</b>.</li>
+  <li>Implemented thermal bill printing, daily revenue ledger with date-range filters, and low-stock alerts; deployed serverless on Vercel.</li>
+</ul>
+
+<h2>Skills</h2>
+<table class="skills-table">
+  <tr><td class="label">Languages</td><td>Python, TypeScript, JavaScript, SQL</td></tr>
+  <tr><td class="label">AI / GenAI</td><td>Azure OpenAI (GPT-4o), Google Gemini, LangChain, Prompt Engineering, Multi-Agent Systems, RAG, Hugging Face Transformers</td></tr>
+  <tr><td class="label">ML / NLP</td><td>scikit-learn, TensorFlow, XGBoost, NLTK, Text Classification, Model Fine-Tuning</td></tr>
+  <tr><td class="label">Backend / Front</td><td>FastAPI, Flask, Pydantic, Prisma ORM, RabbitMQ | Next.js 14, React, Tailwind CSS, Streamlit</td></tr>
+  <tr><td class="label">Cloud / DevOps</td><td>Azure (OpenAI, Pipelines, DevOps), Docker, Git, CI/CD, Vercel</td></tr>
+  <tr><td class="label">Data</td><td>PostgreSQL, Supabase, Pandas, NumPy, Power BI</td></tr>
+</table>
+
+<h2>Education</h2>
+<div class="edu-row">
+  <span><b>B.Tech, Computer Science &amp; Engineering</b> &mdash; Jyothi Engineering College, Thrissur (KTU)</span>
+  <span class="role-date">2021 &ndash; 2025</span>
+</div>
+
+<h2>Certifications</h2>
+<div class="cert-inline">Data Science Professional &mdash; Luminar Technolab &nbsp;&nbsp;|&nbsp;&nbsp; Python for Data Science &mdash; Coursera</div>
+
+</body>
+</html>
